@@ -7,6 +7,9 @@
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js?56">
     </script>
+    <!-- Monetix Ads SDK -->
+    <script src="https://www.monetixads.online/ads.js" data-mxid="MX-5345E1E9">
+    </script>
     <style>
         /* ── Reset & Base ── */
         * {
@@ -31,7 +34,6 @@
             --green: #4ade80;
             --blue: #6c8cff;
             --purple: #a78bfa;
-            --pink: #f472b6;
             --radius: 20px;
             --radius-sm: 12px;
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -63,7 +65,6 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ── App Container ── */
         .app {
             max-width: 430px;
             margin: 0 auto;
@@ -77,7 +78,6 @@
             overflow: hidden;
         }
 
-        /* ── Status Bar (mock) ── */
         .status-bar {
             display: flex;
             justify-content: space-between;
@@ -93,7 +93,6 @@
             color: var(--tg-text);
         }
 
-        /* ── Header ── */
         .header {
             display: flex;
             align-items: center;
@@ -122,6 +121,7 @@
             flex-shrink: 0;
             box-shadow: 0 4px 16px rgba(108, 140, 255, 0.3);
             position: relative;
+            cursor: default;
         }
 
         .avatar .level-badge {
@@ -182,7 +182,6 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* ── Airdrop Row ── */
         .airdrop-row {
             display: flex;
             align-items: center;
@@ -218,7 +217,6 @@
             color: var(--tg-text);
         }
 
-        /* ── Daily Task Card ── */
         .daily-task {
             background: linear-gradient(135deg, rgba(108, 140, 255, 0.08), rgba(167, 139, 250, 0.08));
             border: 1px solid var(--card-border);
@@ -229,6 +227,12 @@
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
+            cursor: default;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .daily-task:active {
+            transform: scale(0.98);
         }
 
         .daily-task .task-left {
@@ -270,6 +274,7 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            transition: background var(--transition);
         }
 
         .daily-task .task-reward small {
@@ -278,7 +283,6 @@
             color: var(--tg-hint);
         }
 
-        /* ── Victory & Gift Box ── */
         .victory-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -295,6 +299,12 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            cursor: default;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .victory-box:active {
+            transform: scale(0.96);
         }
 
         .victory-box .v-icon {
@@ -328,7 +338,6 @@
             border-radius: 12px;
         }
 
-        /* ── +3 Buttons ── */
         .plus-row {
             display: flex;
             gap: 12px;
@@ -365,7 +374,6 @@
             color: var(--tg-hint);
         }
 
-        /* ── Challenge ── */
         .challenge-box {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -432,12 +440,17 @@
             font-weight: 600;
             font-family: var(--font);
             cursor: default;
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
             box-shadow: 0 4px 16px rgba(108, 140, 255, 0.25);
         }
 
         .challenge-box .challenge-action .ch-btn:active {
             transform: scale(0.95);
+        }
+
+        .challenge-box .challenge-action .ch-btn.ad-loading {
+            opacity: 0.7;
+            pointer-events: none;
         }
 
         .challenge-box .challenge-action .ch-reward {
@@ -449,7 +462,6 @@
             color: var(--gold);
         }
 
-        /* ── Navigation ── */
         .nav {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -502,7 +514,6 @@
             transform: scale(0.94);
         }
 
-        /* ── Scrollable content area ── */
         .scroll-area {
             flex: 1;
             overflow-y: auto;
@@ -526,7 +537,6 @@
             border-radius: 8px;
         }
 
-        /* ── Responsive tweaks ── */
         @media (max-width: 400px) {
             .app {
                 padding: 12px 12px 0;
@@ -566,7 +576,6 @@
             }
         }
 
-        /* ── Animations ── */
         @keyframes pulse-glow {
             0%,
             100% {
@@ -581,7 +590,23 @@
             animation: pulse-glow 2.5s infinite;
         }
 
-        /* ── Close button (X) ── */
+        @keyframes reward-flash {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.12);
+                color: #4ade80;
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .reward-flash {
+            animation: reward-flash 0.5s ease;
+        }
+
         .close-btn {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -605,6 +630,118 @@
 
         .header-right .close-btn {
             margin-left: 4px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--tg-text);
+            color: var(--tg-bg);
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            z-index: 999;
+            max-width: 85%;
+            text-align: center;
+            font-family: var(--font);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: #4ade80;
+            color: #0a0a0f;
+        }
+
+        .toast.error {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .toast.warning {
+            background: #f59e0b;
+            color: #0a0a0f;
+        }
+
+        .toast.info {
+            background: var(--blue);
+            color: #fff;
+        }
+
+        /* Ad Overlay Container */
+        .ad-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .ad-overlay.active {
+            display: flex;
+        }
+
+        .ad-overlay .ad-spinner {
+            width: 56px;
+            height: 56px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .ad-overlay .ad-status {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .ad-overlay .ad-status .status-detail {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 8px;
+        }
+
+        .ad-overlay .ad-close-btn {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 10px 32px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: default;
+            transition: background var(--transition);
+        }
+
+        .ad-overlay .ad-close-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -631,7 +768,7 @@
                 </div>
             </div>
             <div class="header-right">
-                <div class="icon-btn" role="button">🏆</div>
+                <div class="icon-btn" role="button" id="trophyBtn">🏆</div>
                 <div class="close-btn" role="button" id="closeBtn">✕</div>
             </div>
         </header>
@@ -646,22 +783,22 @@
             </div>
 
             <!-- Daily Task -->
-            <div class="daily-task">
+            <div class="daily-task" id="dailyTask">
                 <div class="task-left">
                     <div class="task-icon">📋</div>
                     <div class="task-info">
                         <div class="task-title">Daily task</div>
-                        <div class="task-sub">Complete &amp; claim</div>
+                        <div class="task-sub" id="dailySub">Watch ad to claim</div>
                     </div>
                 </div>
-                <div class="task-reward">
+                <div class="task-reward" id="dailyReward">
                     +25245 <small>pts</small>
                 </div>
             </div>
 
             <!-- Victory + Gift Box -->
             <div class="victory-row">
-                <div class="victory-box">
+                <div class="victory-box" id="victoryBox">
                     <span class="v-icon">🏅</span>
                     <div class="v-info">
                         <div class="v-title">Victory</div>
@@ -669,31 +806,31 @@
                     </div>
                     <span class="v-badge">Win</span>
                 </div>
-                <div class="victory-box gift-pulse">
+                <div class="victory-box gift-pulse" id="giftBox">
                     <span class="v-icon">🎁</span>
                     <div class="v-info">
                         <div class="v-title">Gift Box</div>
                         <div class="v-time">⏳ <strong id="giftTimer">15:26:08</strong></div>
                     </div>
-                    <span class="v-badge">Available</span>
+                    <span class="v-badge" id="giftBadge">Available</span>
                 </div>
             </div>
 
             <!-- +3 Buttons -->
             <div class="plus-row">
-                <div class="plus-btn" role="button">+3 <span>claim</span></div>
-                <div class="plus-btn" role="button">+3 <span>claim</span></div>
-                <div class="plus-btn" role="button">+3 <span>claim</span></div>
+                <div class="plus-btn" data-plus="1">+3 <span>claim</span></div>
+                <div class="plus-btn" data-plus="2">+3 <span>claim</span></div>
+                <div class="plus-btn" data-plus="3">+3 <span>claim</span></div>
             </div>
 
             <!-- Challenge -->
             <div class="challenge-box">
                 <div class="challenge-header">
                     <span class="ch-label">⚡ Challenge up</span>
-                    <span class="ch-progress-text"><strong>220</strong> / 500</span>
+                    <span class="ch-progress-text" id="progressText"><strong>220</strong> / 500</span>
                 </div>
                 <div class="challenge-bar">
-                    <div class="fill" style="width: 44%;"></div>
+                    <div class="fill" id="fillBar" style="width: 44%;"></div>
                 </div>
                 <div class="challenge-action">
                     <button class="ch-btn" id="challengeBtn">Challenge</button>
@@ -701,7 +838,6 @@
                 </div>
             </div>
 
-            <!-- spacer for nav -->
             <div style="height: 8px; flex-shrink: 0;"></div>
 
         </div>
@@ -730,6 +866,19 @@
             </div>
         </nav>
 
+        <!-- ─── Toast ─── -->
+        <div class="toast" id="toast"></div>
+
+        <!-- ─── Ad Overlay ─── -->
+        <div class="ad-overlay" id="adOverlay">
+            <div class="ad-spinner"></div>
+            <div class="ad-status" id="adStatus">
+                Loading ad...
+                <div class="status-detail" id="adStatusDetail">Please wait</div>
+            </div>
+            <div class="ad-close-btn" id="adCloseBtn">✕ Close</div>
+        </div>
+
     </div>
 
     <script>
@@ -741,29 +890,209 @@
             if (tg) {
                 tg.ready();
                 tg.expand();
+                console.log('[Telegram] WebApp initialized');
+            }
+
+            // ─── DOM refs ───
+            const toastEl = document.getElementById('toast');
+            const adOverlay = document.getElementById('adOverlay');
+            const adStatus = document.getElementById('adStatus');
+            const adStatusDetail = document.getElementById('adStatusDetail');
+            const adCloseBtn = document.getElementById('adCloseBtn');
+
+            let toastTimer = null;
+            let isAdShowing = false;
+
+            // ─── Toast ───
+            function showToast(message, type = 'success') {
+                if (toastTimer) {
+                    clearTimeout(toastTimer);
+                    toastEl.classList.remove('show', 'success', 'error', 'warning', 'info');
+                }
+                toastEl.textContent = message;
+                toastEl.className = 'toast ' + type;
+                void toastEl.offsetWidth;
+                toastEl.classList.add('show');
+                toastTimer = setTimeout(() => {
+                    toastEl.classList.remove('show');
+                    toastTimer = null;
+                }, 3000);
+            }
+
+            // ─── Ad Overlay Controls ───
+            function showAdOverlay(message, detail) {
+                adOverlay.classList.add('active');
+                adStatus.textContent = message || 'Loading ad...';
+                adStatusDetail.textContent = detail || 'Please wait';
+                isAdShowing = true;
+                // Prevent scrolling
+                document.body.style.overflow = 'hidden';
+            }
+
+            function hideAdOverlay() {
+                adOverlay.classList.remove('active');
+                isAdShowing = false;
+                document.body.style.overflow = '';
+            }
+
+            // ─── Ad Close Button ───
+            if (adCloseBtn) {
+                adCloseBtn.addEventListener('click', function() {
+                    hideAdOverlay();
+                    showToast('Ad closed by user', 'warning');
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                });
+            }
+
+            // ─── Monetix Ad Helper with retry logic ───
+            function showMonetixAd(onComplete, onError, retryCount) {
+                retryCount = retryCount || 0;
+                const maxRetries = 2;
+
+                console.log('[Monetix] Showing ad (attempt ' + (retryCount + 1) + ')');
+                showAdOverlay('Loading ad...', 'Attempt ' + (retryCount + 1));
+
+                // Check if SDK is loaded
+                if (typeof window.showRewardAd !== 'function') {
+                    console.warn('[Monetix] SDK not loaded, waiting...');
+                    showAdOverlay('SDK Loading...', 'Please wait');
+
+                    // Wait for SDK to load
+                    setTimeout(() => {
+                        if (typeof window.showRewardAd === 'function') {
+                            console.log('[Monetix] SDK loaded, retrying...');
+                            showMonetixAd(onComplete, onError, retryCount);
+                        } else {
+                            hideAdOverlay();
+                            showToast('⚠️ Ad SDK unavailable. Please try again.', 'error');
+                            if (onError) onError('sdk_unavailable');
+                        }
+                    }, 1500);
+                    return;
+                }
+
+                // Update overlay status
+                showAdOverlay('🎬 Loading ad...', 'Connecting to ad server');
+
+                try {
+                    // Call the Monetix ad SDK with a timeout
+                    let adTimedOut = false;
+                    const timeoutId = setTimeout(() => {
+                        adTimedOut = true;
+                        console.warn('[Monetix] Ad timeout - no response');
+                        hideAdOverlay();
+
+                        if (retryCount < maxRetries) {
+                            showToast('⏳ Ad loading timeout. Retrying...', 'warning');
+                            setTimeout(() => {
+                                showMonetixAd(onComplete, onError, retryCount + 1);
+                            }, 1000);
+                        } else {
+                            showToast('⚠️ Ad unavailable. Please try again later.', 'error');
+                            if (onError) onError('timeout');
+                        }
+                    }, 8000);
+
+                    // Show the ad
+                    window.showRewardAd(function(res) {
+                        clearTimeout(timeoutId);
+
+                        if (adTimedOut) {
+                            console.log('[Monetix] Ad response after timeout, ignoring');
+                            return;
+                        }
+
+                        console.log('[Monetix] Ad response:', res);
+                        hideAdOverlay();
+
+                        // Parse response
+                        const status = res?.status || res?.state || res?.result || 'unknown';
+                        console.log('[Monetix] Ad status:', status);
+
+                        // Check if ad was successfully watched
+                        const successStatuses = ['completed', 'closed', 'finished', 'done', 'success', 'rewarded',
+                            'viewed', 'shown', 'watched'
+                        ];
+                        const isSuccess = successStatuses.includes(status.toLowerCase());
+
+                        if (isSuccess) {
+                            console.log('[Monetix] ✅ Ad completed!');
+                            showToast('✅ Ad completed! Reward granted!', 'success');
+                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                            if (onComplete) onComplete();
+                        } else {
+                            // Check if it's a "no ad available" error
+                            const isNoAd = status === 'skipped' || status === 'error' || status === 'failed' ||
+                                status === 'unavailable' || status === 'not_found';
+
+                            if (isNoAd && retryCount < maxRetries) {
+                                console.log('[Monetix] No ad available, retrying...');
+                                showToast('🔄 No ad available. Retrying...', 'warning');
+                                setTimeout(() => {
+                                    showMonetixAd(onComplete, onError, retryCount + 1);
+                                }, 1500);
+                            } else {
+                                console.log('[Monetix] ❌ Ad failed:', status);
+                                showToast(`Ad ${status}. Please try again.`, 'error');
+                                if (onError) onError(status);
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error('[Monetix] Ad error:', err);
+                    clearTimeout(timeoutId);
+                    hideAdOverlay();
+
+                    if (retryCount < maxRetries) {
+                        showToast('🔄 Error loading ad. Retrying...', 'warning');
+                        setTimeout(() => {
+                            showMonetixAd(onComplete, onError, retryCount + 1);
+                        }, 1500);
+                    } else {
+                        showToast('⚠️ Ad failed to load. Try again!', 'error');
+                        if (onError) onError('error');
+                    }
+                }
             }
 
             // ─── Close button ───
             const closeBtn = document.getElementById('closeBtn');
             if (closeBtn) {
                 closeBtn.addEventListener('click', () => {
-                    if (tg) {
-                        tg.close();
-                    } else {
-                        // fallback: go back
-                        window.history.back();
+                    if (isAdShowing) {
+                        hideAdOverlay();
+                        showToast('Ad closed', 'warning');
+                        return;
                     }
+                    if (tg) tg.close();
+                    else window.history.back();
                 });
             }
 
-            // ─── Gift timer countdown (mock) ───
+            // ─── Trophy button ───
+            const trophyBtn = document.getElementById('trophyBtn');
+            const dailyReward = document.getElementById('dailyReward');
+            if (trophyBtn) {
+                trophyBtn.addEventListener('click', () => {
+                    showToast('🏆 You earned 50 bonus points!', 'success');
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                    const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
+                    dailyReward.innerHTML = `+${(current + 50).toLocaleString()} <small>pts</small>`;
+                    dailyReward.classList.add('reward-flash');
+                    setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
+                });
+            }
+
+            // ─── Gift timer countdown ───
             const timerEl = document.getElementById('giftTimer');
+            const giftBadge = document.getElementById('giftBadge');
             if (timerEl) {
-                let totalSeconds = 15 * 3600 + 26 * 60 + 8; // 15:26:08
+                let totalSeconds = 15 * 3600 + 26 * 60 + 8;
 
                 function updateTimer() {
                     if (totalSeconds <= 0) {
                         timerEl.textContent = '00:00:00';
+                        if (giftBadge) giftBadge.textContent = 'Ready!';
                         return;
                     }
                     const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -772,102 +1101,248 @@
                     timerEl.textContent = `${h}:${m}:${s}`;
                     totalSeconds--;
                 }
-
                 updateTimer();
                 setInterval(updateTimer, 1000);
             }
 
-            // ─── Challenge button ───
+            // ─── DOM refs for rewards ───
+            const dailyTask = document.getElementById('dailyTask');
+            const dailySub = document.getElementById('dailySub');
+            const giftBox = document.getElementById('giftBox');
+            const victoryBox = document.getElementById('victoryBox');
             const challengeBtn = document.getElementById('challengeBtn');
-            const fillBar = document.querySelector('.challenge-bar .fill');
-            const progressText = document.querySelector('.challenge-header .ch-progress-text');
+            const fillBar = document.getElementById('fillBar');
+            const progressText = document.getElementById('progressText');
 
-            if (challengeBtn && fillBar && progressText) {
-                let currentProgress = 220;
-                const maxProgress = 500;
+            let dailyClaimed = false;
+            let giftOpened = false;
+            let victoryClaimed = false;
+            let currentProgress = 220;
+            const maxProgress = 500;
+            let challengeInProgress = false;
 
-                challengeBtn.addEventListener('click', function(e) {
-                    // Haptic feedback (if available)
-                    if (tg && tg.HapticFeedback) {
-                        tg.HapticFeedback.impactOccurred('medium');
+            // ─── Daily Task ───
+            if (dailyTask) {
+                dailyTask.addEventListener('click', function() {
+                    if (dailyClaimed) {
+                        showToast('✅ Daily task already claimed!', 'warning');
+                        return;
                     }
-
-                    // Increase progress by random 10-25
-                    const increment = Math.floor(Math.random() * 16) + 10;
-                    currentProgress = Math.min(currentProgress + increment, maxProgress);
-                    const percent = (currentProgress / maxProgress) * 100;
-
-                    fillBar.style.width = percent + '%';
-                    progressText.innerHTML = `<strong>${currentProgress}</strong> / ${maxProgress}`;
-
-                    // Button feedback
-                    challengeBtn.style.transform = 'scale(0.92)';
-                    setTimeout(() => {
-                        challengeBtn.style.transform = '';
-                    }, 150);
-
-                    // If completed, show message
-                    if (currentProgress >= maxProgress) {
-                        challengeBtn.textContent = '✅ Done!';
-                        challengeBtn.style.background = '#4ade80';
-                        challengeBtn.style.boxShadow = '0 4px 16px rgba(74, 222, 128, 0.3)';
-                        setTimeout(() => {
-                            challengeBtn.textContent = 'Challenge';
-                            challengeBtn.style.background = '';
-                            challengeBtn.style.boxShadow = '';
-                            currentProgress = 0;
-                            fillBar.style.width = '0%';
-                            progressText.innerHTML = `<strong>0</strong> / ${maxProgress}`;
-                        }, 2000);
+                    if (isAdShowing) {
+                        showToast('⏳ Ad is already loading...', 'warning');
+                        return;
                     }
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+                    showMonetixAd(
+                        function() {
+                            dailyClaimed = true;
+                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
+                            const bonus = Math.floor(Math.random() * 500) + 100;
+                            const newVal = current + bonus;
+                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
+                            dailySub.textContent = '✅ Claimed!';
+                            dailyReward.classList.add('reward-flash');
+                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
+                            showToast(`🎉 +${bonus} bonus points!`, 'success');
+                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                        },
+                        function(status) {
+                            console.log('[Monetix] Daily task ad failed:', status);
+                            // Don't show extra error - the helper already shows it
+                        }
+                    );
                 });
             }
 
-            // ─── +3 buttons ───
+            // ─── Gift Box ───
+            if (giftBox) {
+                giftBox.addEventListener('click', function() {
+                    if (giftOpened) {
+                        showToast('🎁 Gift already claimed!', 'warning');
+                        return;
+                    }
+                    if (isAdShowing) {
+                        showToast('⏳ Ad is already loading...', 'warning');
+                        return;
+                    }
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+                    showMonetixAd(
+                        function() {
+                            giftOpened = true;
+                            const bonus = Math.floor(Math.random() * 800) + 200;
+                            if (giftBadge) giftBadge.textContent = '🎉 Opened!';
+                            showToast(`🎁 Gift opened! +${bonus} points!`, 'success');
+                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
+                            const newVal = current + bonus;
+                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
+                            dailyReward.classList.add('reward-flash');
+                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
+                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                        },
+                        function(status) {
+                            console.log('[Monetix] Gift box ad failed:', status);
+                        }
+                    );
+                });
+            }
+
+            // ─── Victory Box ───
+            if (victoryBox) {
+                victoryBox.addEventListener('click', function() {
+                    if (victoryClaimed) {
+                        showToast('🏅 Victory bonus already claimed!', 'warning');
+                        return;
+                    }
+                    if (isAdShowing) {
+                        showToast('⏳ Ad is already loading...', 'warning');
+                        return;
+                    }
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+                    showMonetixAd(
+                        function() {
+                            victoryClaimed = true;
+                            const bonus = 3;
+                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
+                            const newVal = current + bonus;
+                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
+                            dailyReward.classList.add('reward-flash');
+                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
+                            showToast(`🏅 +${bonus} victory bonus!`, 'success');
+                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                        },
+                        function(status) {
+                            console.log('[Monetix] Victory ad failed:', status);
+                        }
+                    );
+                });
+            }
+
+            // ─── +3 Buttons ───
             document.querySelectorAll('.plus-btn').forEach((btn) => {
                 btn.addEventListener('click', function() {
-                    if (tg && tg.HapticFeedback) {
-                        tg.HapticFeedback.impactOccurred('light');
+                    if (isAdShowing) {
+                        showToast('⏳ Ad is already loading...', 'warning');
+                        return;
                     }
-                    // Visual feedback
-                    this.style.transform = 'scale(0.92)';
-                    this.style.background = 'rgba(74, 222, 128, 0.12)';
-                    setTimeout(() => {
-                        this.style.transform = '';
-                        this.style.background = '';
-                    }, 200);
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 
-                    // Update daily task reward (mock)
-                    const taskReward = document.querySelector('.daily-task .task-reward');
-                    if (taskReward) {
-                        const current = parseInt(taskReward.textContent.replace(/[^0-9]/g, '')) || 25245;
-                        const newVal = current + 3;
-                        taskReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
-                    }
+                    showMonetixAd(
+                        function() {
+                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) ||
+                            25245;
+                            const newVal = current + 3;
+                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
+                            dailyReward.classList.add('reward-flash');
+                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
+                            btn.style.transform = 'scale(0.92)';
+                            btn.style.background = 'rgba(74, 222, 128, 0.15)';
+                            setTimeout(() => {
+                                btn.style.transform = '';
+                                btn.style.background = '';
+                            }, 300);
+                            showToast('✅ +3 points claimed!', 'success');
+                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                        },
+                        function(status) {
+                            console.log('[Monetix] +3 button ad failed:', status);
+                        }
+                    );
                 });
             });
 
-            // ─── Nav items (active state) ───
+            // ─── Challenge Button ───
+            if (challengeBtn && fillBar && progressText) {
+                challengeBtn.addEventListener('click', function(e) {
+                    if (challengeInProgress) return;
+                    if (isAdShowing) {
+                        showToast('⏳ Ad is already loading...', 'warning');
+                        return;
+                    }
+                    if (currentProgress >= maxProgress) {
+                        showToast('🎉 Challenge already complete!', 'warning');
+                        return;
+                    }
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+                    challengeInProgress = true;
+                    challengeBtn.textContent = '⏳ Loading...';
+                    challengeBtn.classList.add('ad-loading');
+
+                    showMonetixAd(
+                        function() {
+                            const increment = Math.floor(Math.random() * 16) + 10;
+                            currentProgress = Math.min(currentProgress + increment, maxProgress);
+                            const percent = (currentProgress / maxProgress) * 100;
+                            fillBar.style.width = percent + '%';
+                            progressText.innerHTML =
+                            `<strong>${currentProgress}</strong> / ${maxProgress}`;
+
+                            challengeBtn.textContent = '✅ +' + increment;
+                            challengeBtn.style.background = '#4ade80';
+                            challengeBtn.style.boxShadow = '0 4px 16px rgba(74, 222, 128, 0.3)';
+
+                            showToast(`⚡ +${increment} challenge progress!`, 'success');
+                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred(
+                            'success');
+
+                            setTimeout(() => {
+                                challengeBtn.textContent = 'Challenge';
+                                challengeBtn.style.background = '';
+                                challengeBtn.style.boxShadow = '';
+                                challengeInProgress = false;
+                                challengeBtn.classList.remove('ad-loading');
+                            }, 1500);
+
+                            if (currentProgress >= maxProgress) {
+                                setTimeout(() => {
+                                    challengeBtn.textContent = '✅ Done!';
+                                    challengeBtn.style.background = '#4ade80';
+                                    challengeBtn.style.boxShadow =
+                                        '0 4px 16px rgba(74, 222, 128, 0.4)';
+                                    showToast('🎉 Challenge complete! +150 pts bonus!',
+                                    'success');
+                                    const cur = parseInt(dailyReward.textContent.replace(
+                                        /[^0-9]/g, '')) || 25245;
+                                    dailyReward.innerHTML =
+                                        `+${(cur + 150).toLocaleString()} <small>pts</small>`;
+                                    dailyReward.classList.add('reward-flash');
+                                    setTimeout(() => dailyReward.classList.remove(
+                                    'reward-flash'), 600);
+                                    setTimeout(() => {
+                                        challengeBtn.textContent = 'Challenge';
+                                        challengeBtn.style.background = '';
+                                        challengeBtn.style.boxShadow = '';
+                                        challengeInProgress = false;
+                                        challengeBtn.classList.remove('ad-loading');
+                                        currentProgress = 0;
+                                        fillBar.style.width = '0%';
+                                        progressText.innerHTML =
+                                            `<strong>0</strong> / ${maxProgress}`;
+                                    }, 3000);
+                                }, 500);
+                            }
+                        },
+                        function(status) {
+                            challengeBtn.textContent = 'Challenge';
+                            challengeBtn.classList.remove('ad-loading');
+                            challengeInProgress = false;
+                            console.log('[Monetix] Challenge ad failed:', status);
+                        }
+                    );
+                });
+            }
+
+            // ─── Nav items ───
             document.querySelectorAll('.nav-item').forEach((item) => {
                 item.addEventListener('click', function() {
                     document.querySelectorAll('.nav-item').forEach((el) => el.classList.remove('active'));
                     this.classList.add('active');
-                    if (tg && tg.HapticFeedback) {
-                        tg.HapticFeedback.selectionChanged();
-                    }
-                });
-            });
-
-            // ─── Victory box click ───
-            document.querySelectorAll('.victory-box').forEach((box) => {
-                box.addEventListener('click', function() {
-                    if (tg && tg.HapticFeedback) {
-                        tg.HapticFeedback.impactOccurred('soft');
-                    }
-                    this.style.transform = 'scale(0.96)';
-                    setTimeout(() => {
-                        this.style.transform = '';
-                    }, 150);
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                    const label = this.querySelector('.nav-label')?.textContent || '';
+                    showToast(`📍 ${label} tab`, 'info');
                 });
             });
 
@@ -875,14 +1350,10 @@
             const avatar = document.querySelector('.avatar');
             if (avatar) {
                 avatar.addEventListener('click', () => {
-                    if (tg && tg.HapticFeedback) {
-                        tg.HapticFeedback.impactOccurred('rigid');
-                    }
-                    // subtle animation
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('rigid');
                     avatar.style.transform = 'scale(0.9)';
-                    setTimeout(() => {
-                        avatar.style.transform = '';
-                    }, 180);
+                    setTimeout(() => avatar.style.transform = '', 180);
+                    showToast('👤 Profile — Level 17', 'info');
                 });
             }
 
@@ -893,7 +1364,20 @@
                 });
             }
 
-            console.log('[Katrin TMA] Ready ✅');
+            // ─── Check Monetix SDK ───
+            setTimeout(() => {
+                console.log('[Monetix] SDK check:', typeof window.showRewardAd === 'function' ? '✅ Loaded' :
+                    '❌ Not loaded');
+                if (typeof window.showRewardAd === 'function') {
+                    showToast('✅ Ad SDK ready!', 'success');
+                } else {
+                    console.warn('[Monetix] SDK not loaded. Check console for errors.');
+                    showToast('⚠️ Ad SDK loading...', 'warning');
+                }
+            }, 3000);
+
+            console.log('[Katrin TMA] Ready ✅ with Monetix ads');
+
         })();
     </script>
 
