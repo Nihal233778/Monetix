@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Katrin — TMA</title>
+    <title>Reward Hub — TMA</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js?56">
     </script>
@@ -11,7 +11,6 @@
     <script src="https://www.monetixads.online/ads.js" data-mxid="MX-5345E1E9">
     </script>
     <style>
-        /* ── Reset & Base ── */
         * {
             margin: 0;
             padding: 0;
@@ -19,26 +18,21 @@
         }
 
         :root {
-            --tg-bg: var(--tg-theme-bg-color, #0a0a0f);
+            --tg-bg: var(--tg-theme-bg-color, #0f0f1a);
             --tg-text: var(--tg-theme-text-color, #ffffff);
             --tg-hint: var(--tg-theme-hint-color, #8888aa);
-            --tg-link: var(--tg-theme-link-color, #6c8cff);
             --tg-button: var(--tg-theme-button-color, #6c8cff);
             --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
             --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #1a1a2e);
-            --tg-section-bg: var(--tg-theme-section-bg-color, #12121f);
-
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --card-border: rgba(255, 255, 255, 0.06);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             --gold: #f7c948;
             --green: #4ade80;
             --blue: #6c8cff;
             --purple: #a78bfa;
-            --radius: 20px;
-            --radius-sm: 12px;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --transition: 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --pink: #f472b6;
         }
 
         @media (prefers-color-scheme: light) {
@@ -47,10 +41,7 @@
                 --tg-text: #1a1a2e;
                 --tg-hint: #6b6b8a;
                 --tg-secondary-bg: #ececf3;
-                --tg-section-bg: #ffffff;
-                --card-bg: rgba(0, 0, 0, 0.03);
-                --card-border: rgba(0, 0, 0, 0.06);
-                --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+                --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
             }
         }
 
@@ -61,420 +52,308 @@
             background: var(--tg-bg);
             color: var(--tg-text);
             overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .app {
-            max-width: 430px;
+            max-width: 420px;
             margin: 0 auto;
             height: 100vh;
             height: 100dvh;
             display: flex;
             flex-direction: column;
-            padding: 16px 16px 0;
+            padding: 16px 16px 12px;
             background: var(--tg-bg);
-            position: relative;
             overflow: hidden;
         }
 
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--tg-hint);
-            padding: 4px 4px 12px;
-            letter-spacing: 0.3px;
-            flex-shrink: 0;
-        }
-
-        .status-bar .time {
-            color: var(--tg-text);
-        }
-
+        /* ─── Header ─── */
         .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 4px 0 14px;
+            padding: 4px 0 16px;
             flex-shrink: 0;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--blue), var(--purple));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            flex-shrink: 0;
-            box-shadow: 0 4px 16px rgba(108, 140, 255, 0.3);
-            position: relative;
-            cursor: default;
-        }
-
-        .avatar .level-badge {
-            position: absolute;
-            bottom: -2px;
-            right: -2px;
-            background: var(--gold);
-            color: #1a1a2e;
-            font-size: 9px;
-            font-weight: 800;
-            padding: 1px 6px;
-            border-radius: 10px;
-            border: 2px solid var(--tg-bg);
-            line-height: 1.4;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .user-info .name {
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--tg-text);
-            line-height: 1.2;
-        }
-
-        .user-info .level {
-            font-size: 12px;
-            color: var(--tg-hint);
-            font-weight: 500;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .header-right .icon-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: var(--tg-text);
-            transition: background var(--transition), transform var(--transition);
-            cursor: default;
-        }
-
-        .header-right .icon-btn:active {
-            transform: scale(0.92);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .airdrop-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-sm);
-            padding: 10px 16px;
-            margin-bottom: 14px;
-            flex-shrink: 0;
-        }
-
-        .airdrop-row .label {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--tg-hint);
-        }
-
-        .airdrop-row .label span {
-            color: var(--gold);
-        }
-
-        .airdrop-row .rank {
-            font-size: 13px;
-            color: var(--tg-hint);
-            background: var(--tg-secondary-bg);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-
-        .airdrop-row .rank strong {
-            color: var(--tg-text);
-        }
-
-        .daily-task {
-            background: linear-gradient(135deg, rgba(108, 140, 255, 0.08), rgba(167, 139, 250, 0.08));
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            padding: 16px 18px;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            cursor: default;
-            transition: transform var(--transition), box-shadow var(--transition);
-        }
-
-        .daily-task:active {
-            transform: scale(0.98);
-        }
-
-        .daily-task .task-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .daily-task .task-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold), #f59e0b);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .daily-task .task-info .task-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--tg-text);
-        }
-
-        .daily-task .task-info .task-sub {
-            font-size: 12px;
-            color: var(--tg-hint);
-        }
-
-        .daily-task .task-reward {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--gold);
-            background: rgba(247, 201, 72, 0.12);
-            padding: 6px 14px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: background var(--transition);
-        }
-
-        .daily-task .task-reward small {
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--tg-hint);
-        }
-
-        .victory-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 14px;
-            flex-shrink: 0;
-        }
-
-        .victory-box {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-sm);
-            padding: 12px 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: default;
-            transition: transform var(--transition), box-shadow var(--transition);
-        }
-
-        .victory-box:active {
-            transform: scale(0.96);
-        }
-
-        .victory-box .v-icon {
-            font-size: 28px;
-            flex-shrink: 0;
-        }
-
-        .victory-box .v-info .v-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--tg-text);
-        }
-
-        .victory-box .v-info .v-time {
-            font-size: 12px;
-            color: var(--tg-hint);
-            font-weight: 500;
-        }
-
-        .victory-box .v-info .v-time strong {
-            color: var(--gold);
-        }
-
-        .victory-box .v-badge {
-            margin-left: auto;
-            background: rgba(247, 201, 72, 0.15);
-            color: var(--gold);
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 10px;
-            border-radius: 12px;
-        }
-
-        .plus-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 14px;
-            flex-shrink: 0;
-        }
-
-        .plus-btn {
-            flex: 1;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-sm);
-            padding: 12px 0;
-            text-align: center;
+        .header h1 {
             font-size: 22px;
             font-weight: 700;
-            color: var(--green);
-            transition: background var(--transition), transform var(--transition);
-            cursor: default;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .status {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--tg-hint);
+            background: var(--tg-secondary-bg);
+            padding: 4px 14px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 6px;
         }
 
-        .plus-btn:active {
-            transform: scale(0.96);
-            background: rgba(74, 222, 128, 0.06);
+        .header .status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            display: inline-block;
+            animation: pulse-dot 1.8s infinite;
         }
 
-        .plus-btn span {
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+        }
+
+        /* ─── Balance Card ─── */
+        .balance-card {
+            background: linear-gradient(135deg, rgba(108, 140, 255, 0.12), rgba(167, 139, 250, 0.08));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 18px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .balance-card .label {
             font-size: 13px;
-            font-weight: 600;
+            color: var(--tg-hint);
+            font-weight: 500;
+        }
+
+        .balance-card .points {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .balance-card .points small {
+            font-size: 14px;
+            font-weight: 500;
             color: var(--tg-hint);
         }
 
-        .challenge-box {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-sm);
-            padding: 14px 16px;
-            margin-bottom: 14px;
-            flex-shrink: 0;
+        /* ─── Scroll Area ─── */
+        .scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 2px;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .challenge-box .challenge-header {
+        .scroll-area::-webkit-scrollbar {
+            width: 3px;
+        }
+        .scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: var(--tg-hint);
+            border-radius: 8px;
+        }
+
+        /* ─── Reward Grid ─── */
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--tg-text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reward-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .reward-card {
+            background: var(--tg-secondary-bg);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: var(--radius-sm);
+            padding: 16px 14px;
+            text-align: center;
+            cursor: default;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            user-select: none;
+            position: relative;
+        }
+
+        .reward-card:active {
+            transform: scale(0.96);
+        }
+
+        .reward-card .icon {
+            font-size: 32px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .reward-card .name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--tg-text);
+        }
+
+        .reward-card .reward-amount {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gold);
+            margin-top: 4px;
+        }
+
+        .reward-card .reward-amount small {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--tg-hint);
+        }
+
+        .reward-card .badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 2px 10px;
+            border-radius: 12px;
+            background: rgba(74, 222, 128, 0.15);
+            color: var(--green);
+        }
+
+        .reward-card .badge.claimed {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--tg-hint);
+        }
+
+        .reward-card .badge.ad {
+            background: rgba(108, 140, 255, 0.15);
+            color: var(--blue);
+        }
+
+        .reward-card .sub-text {
+            font-size: 11px;
+            color: var(--tg-hint);
+            margin-top: 4px;
+        }
+
+        /* ─── Challenge ─── */
+        .challenge-box {
+            background: var(--tg-secondary-bg);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: var(--radius-sm);
+            padding: 16px 18px;
+            margin-bottom: 18px;
+        }
+
+        .challenge-box .ch-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 6px;
         }
 
-        .challenge-box .challenge-header .ch-label {
+        .challenge-box .ch-header .ch-label {
             font-size: 14px;
             font-weight: 600;
             color: var(--tg-text);
         }
 
-        .challenge-box .challenge-header .ch-progress-text {
+        .challenge-box .ch-header .ch-progress {
             font-size: 13px;
             font-weight: 600;
             color: var(--tg-hint);
         }
 
-        .challenge-box .challenge-header .ch-progress-text strong {
+        .challenge-box .ch-header .ch-progress strong {
             color: var(--blue);
         }
 
-        .challenge-bar {
+        .challenge-box .ch-bar {
             width: 100%;
             height: 6px;
-            background: var(--tg-secondary-bg);
+            background: rgba(255, 255, 255, 0.06);
             border-radius: 4px;
             overflow: hidden;
-            margin-top: 4px;
         }
 
-        .challenge-bar .fill {
+        .challenge-box .ch-bar .fill {
             height: 100%;
             width: 44%;
             background: linear-gradient(90deg, var(--blue), var(--purple));
             border-radius: 4px;
-            transition: width 0.6s ease;
+            transition: width 0.5s ease;
         }
 
-        .challenge-box .challenge-action {
+        .challenge-box .ch-action {
             margin-top: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .challenge-box .challenge-action .ch-btn {
+        .challenge-box .ch-action .ch-btn {
             background: var(--blue);
             color: #fff;
             border: none;
-            padding: 8px 24px;
+            padding: 8px 28px;
             border-radius: 30px;
             font-size: 14px;
             font-weight: 600;
             font-family: var(--font);
             cursor: default;
-            transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+            transition: transform 0.15s ease, opacity 0.2s ease;
             box-shadow: 0 4px 16px rgba(108, 140, 255, 0.25);
         }
 
-        .challenge-box .challenge-action .ch-btn:active {
-            transform: scale(0.95);
+        .challenge-box .ch-action .ch-btn:active {
+            transform: scale(0.94);
         }
 
-        .challenge-box .challenge-action .ch-btn.ad-loading {
-            opacity: 0.7;
+        .challenge-box .ch-action .ch-btn:disabled {
+            opacity: 0.6;
             pointer-events: none;
         }
 
-        .challenge-box .challenge-action .ch-reward {
-            font-size: 14px;
+        .challenge-box .ch-action .ch-reward {
+            font-size: 13px;
             color: var(--tg-hint);
         }
 
-        .challenge-box .challenge-action .ch-reward strong {
+        .challenge-box .ch-action .ch-reward strong {
             color: var(--gold);
         }
 
+        /* ─── Nav ─── */
         .nav {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 4px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
+            background: var(--tg-secondary-bg);
+            border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: var(--radius);
             padding: 6px 4px;
             margin-top: auto;
-            margin-bottom: 12px;
             flex-shrink: 0;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
         }
 
         .nav-item {
@@ -483,19 +362,24 @@
             align-items: center;
             padding: 8px 0 6px;
             border-radius: var(--radius-sm);
-            transition: background var(--transition);
+            transition: background 0.15s ease;
             cursor: default;
             color: var(--tg-hint);
             gap: 2px;
+            user-select: none;
+        }
+
+        .nav-item:active {
+            transform: scale(0.92);
         }
 
         .nav-item .nav-icon {
-            font-size: 22px;
+            font-size: 20px;
             line-height: 1;
         }
 
         .nav-item .nav-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 500;
             letter-spacing: 0.2px;
         }
@@ -510,128 +394,7 @@
             font-weight: 600;
         }
 
-        .nav-item:active {
-            transform: scale(0.94);
-        }
-
-        .scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 2px;
-            margin-bottom: 4px;
-            display: flex;
-            flex-direction: column;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .scroll-area::-webkit-scrollbar {
-            width: 3px;
-        }
-
-        .scroll-area::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .scroll-area::-webkit-scrollbar-thumb {
-            background: var(--tg-hint);
-            border-radius: 8px;
-        }
-
-        @media (max-width: 400px) {
-            .app {
-                padding: 12px 12px 0;
-            }
-            .daily-task .task-reward {
-                font-size: 13px;
-                padding: 4px 10px;
-            }
-            .victory-box .v-icon {
-                font-size: 22px;
-            }
-            .plus-btn {
-                font-size: 18px;
-                padding: 10px 0;
-            }
-            .header .avatar {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-            .user-info .name {
-                font-size: 15px;
-            }
-        }
-
-        @media (max-width: 360px) {
-            .victory-row {
-                grid-template-columns: 1fr;
-            }
-            .airdrop-row {
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-            .challenge-box .challenge-action {
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-        }
-
-        @keyframes pulse-glow {
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(247, 201, 72, 0.2);
-            }
-            50% {
-                box-shadow: 0 0 20px 4px rgba(247, 201, 72, 0.1);
-            }
-        }
-
-        .gift-pulse {
-            animation: pulse-glow 2.5s infinite;
-        }
-
-        @keyframes reward-flash {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.12);
-                color: #4ade80;
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .reward-flash {
-            animation: reward-flash 0.5s ease;
-        }
-
-        .close-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            color: var(--tg-hint);
-            transition: background var(--transition), transform var(--transition);
-            cursor: default;
-            flex-shrink: 0;
-        }
-
-        .close-btn:active {
-            transform: scale(0.88);
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .header-right .close-btn {
-            margin-left: 4px;
-        }
-
+        /* ─── Toast ─── */
         .toast {
             position: fixed;
             bottom: 100px;
@@ -639,7 +402,7 @@
             transform: translateX(-50%) translateY(20px);
             background: var(--tg-text);
             color: var(--tg-bg);
-            padding: 10px 22px;
+            padding: 10px 24px;
             border-radius: var(--radius-sm);
             font-size: 13px;
             font-weight: 600;
@@ -648,7 +411,7 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
             pointer-events: none;
             z-index: 999;
-            max-width: 85%;
+            max-width: 88%;
             text-align: center;
             font-family: var(--font);
         }
@@ -678,179 +441,162 @@
             color: #fff;
         }
 
-        /* Ad Overlay Container */
-        .ad-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.92);
-            z-index: 10000;
-            display: none;
-            flex-direction: column;
+        /* ─── Close btn ─── */
+        .close-btn {
+            background: var(--tg-secondary-bg);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-        }
-
-        .ad-overlay.active {
-            display: flex;
-        }
-
-        .ad-overlay .ad-spinner {
-            width: 56px;
-            height: 56px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        .ad-overlay .ad-status {
-            color: #fff;
             font-size: 16px;
-            font-weight: 500;
-            text-align: center;
-        }
-
-        .ad-overlay .ad-status .status-detail {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 8px;
-        }
-
-        .ad-overlay .ad-close-btn {
-            margin-top: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            padding: 10px 32px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
+            color: var(--tg-hint);
+            transition: background 0.15s ease, transform 0.15s ease;
             cursor: default;
-            transition: background var(--transition);
+            flex-shrink: 0;
         }
 
-        .ad-overlay .ad-close-btn:active {
-            background: rgba(255, 255, 255, 0.2);
+        .close-btn:active {
+            transform: scale(0.88);
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 380px) {
+            .reward-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
             }
+            .reward-card {
+                padding: 12px 10px;
+            }
+            .reward-card .icon {
+                font-size: 26px;
+            }
+            .balance-card .points {
+                font-size: 22px;
+            }
+        }
+
+        @keyframes reward-flash {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+                color: #4ade80;
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .reward-flash {
+            animation: reward-flash 0.5s ease;
         }
     </style>
 </head>
 <body>
 
-    <div class="app" id="app">
-
-        <!-- ─── Status Bar ─── -->
-        <div class="status-bar">
-            <span class="time">8:00</span>
-            <span>📶 🔋</span>
-        </div>
+    <div class="app">
 
         <!-- ─── Header ─── -->
         <header class="header">
-            <div class="header-left">
-                <div class="avatar">
-                    K
-                    <span class="level-badge">17</span>
-                </div>
-                <div class="user-info">
-                    <span class="name">Katrin Elsmann</span>
-                    <span class="level">Level 17</span>
-                </div>
-            </div>
+            <h1>⭐ Reward Hub</h1>
             <div class="header-right">
-                <div class="icon-btn" role="button" id="trophyBtn">🏆</div>
-                <div class="close-btn" role="button" id="closeBtn">✕</div>
+                <span class="status"><span class="dot"></span> Live</span>
+                <div class="close-btn" id="closeBtn">✕</div>
             </div>
         </header>
 
-        <!-- ─── Scrollable Area ─── -->
+        <!-- ─── Balance ─── -->
+        <div class="balance-card">
+            <span class="label">💰 Total Points</span>
+            <span class="points" id="totalPoints">25,245 <small>pts</small></span>
+        </div>
+
+        <!-- ─── Scroll Area ─── -->
         <div class="scroll-area">
 
-            <!-- Airdrop -->
-            <div class="airdrop-row">
-                <span class="label">Airdrop <span>▼</span></span>
-                <span class="rank">Your rank No: <strong>25 383</strong></span>
+            <div class="section-title">🎯 Watch & Earn</div>
+
+            <div class="reward-grid">
+
+                <!-- Daily Task -->
+                <div class="reward-card" data-reward="daily">
+                    <span class="icon">📋</span>
+                    <span class="name">Daily Task</span>
+                    <span class="reward-amount" id="dailyAmount">+100-500</span>
+                    <span class="badge ad">AD</span>
+                    <div class="sub-text" id="dailySub">Tap to watch</div>
+                </div>
+
+                <!-- Gift Box -->
+                <div class="reward-card" data-reward="gift">
+                    <span class="icon">🎁</span>
+                    <span class="name">Gift Box</span>
+                    <span class="reward-amount">+200-800</span>
+                    <span class="badge ad">AD</span>
+                    <div class="sub-text" id="giftSub">Tap to open</div>
+                </div>
+
+                <!-- Victory -->
+                <div class="reward-card" data-reward="victory">
+                    <span class="icon">🏅</span>
+                    <span class="name">Victory</span>
+                    <span class="reward-amount">+3</span>
+                    <span class="badge ad">AD</span>
+                    <div class="sub-text" id="victorySub">Tap to claim</div>
+                </div>
+
+                <!-- Bonus -->
+                <div class="reward-card" data-reward="bonus">
+                    <span class="icon">⚡</span>
+                    <span class="name">Bonus</span>
+                    <span class="reward-amount">+5</span>
+                    <span class="badge ad">AD</span>
+                    <div class="sub-text" id="bonusSub">Tap to claim</div>
+                </div>
+
             </div>
 
-            <!-- Daily Task -->
-            <div class="daily-task" id="dailyTask">
-                <div class="task-left">
-                    <div class="task-icon">📋</div>
-                    <div class="task-info">
-                        <div class="task-title">Daily task</div>
-                        <div class="task-sub" id="dailySub">Watch ad to claim</div>
-                    </div>
-                </div>
-                <div class="task-reward" id="dailyReward">
-                    +25245 <small>pts</small>
-                </div>
-            </div>
+            <!-- ─── Challenge ─── -->
+            <div class="section-title">🏆 Challenge</div>
 
-            <!-- Victory + Gift Box -->
-            <div class="victory-row">
-                <div class="victory-box" id="victoryBox">
-                    <span class="v-icon">🏅</span>
-                    <div class="v-info">
-                        <div class="v-title">Victory</div>
-                        <div class="v-time">🎯 <strong>+3</strong> bonus</div>
-                    </div>
-                    <span class="v-badge">Win</span>
-                </div>
-                <div class="victory-box gift-pulse" id="giftBox">
-                    <span class="v-icon">🎁</span>
-                    <div class="v-info">
-                        <div class="v-title">Gift Box</div>
-                        <div class="v-time">⏳ <strong id="giftTimer">15:26:08</strong></div>
-                    </div>
-                    <span class="v-badge" id="giftBadge">Available</span>
-                </div>
-            </div>
-
-            <!-- +3 Buttons -->
-            <div class="plus-row">
-                <div class="plus-btn" data-plus="1">+3 <span>claim</span></div>
-                <div class="plus-btn" data-plus="2">+3 <span>claim</span></div>
-                <div class="plus-btn" data-plus="3">+3 <span>claim</span></div>
-            </div>
-
-            <!-- Challenge -->
             <div class="challenge-box">
-                <div class="challenge-header">
-                    <span class="ch-label">⚡ Challenge up</span>
-                    <span class="ch-progress-text" id="progressText"><strong>220</strong> / 500</span>
+                <div class="ch-header">
+                    <span class="ch-label">⚡ Progress</span>
+                    <span class="ch-progress" id="challengeProgress"><strong>220</strong> / 500</span>
                 </div>
-                <div class="challenge-bar">
-                    <div class="fill" id="fillBar" style="width: 44%;"></div>
+                <div class="ch-bar">
+                    <div class="fill" id="challengeFill" style="width: 44%;"></div>
                 </div>
-                <div class="challenge-action">
-                    <button class="ch-btn" id="challengeBtn">Challenge</button>
+                <div class="ch-action">
+                    <button class="ch-btn" id="challengeBtn">🚀 Boost</button>
                     <span class="ch-reward">Reward: <strong>+150</strong> pts</span>
                 </div>
             </div>
 
-            <div style="height: 8px; flex-shrink: 0;"></div>
+            <div style="height: 8px;"></div>
 
         </div>
 
-        <!-- ─── Navigation ─── -->
+        <!-- ─── Nav ─── -->
         <nav class="nav">
             <div class="nav-item active">
-                <span class="nav-icon">⚔️</span>
-                <span class="nav-label">Duel</span>
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
             </div>
             <div class="nav-item">
-                <span class="nav-icon">🔍</span>
-                <span class="nav-label">Search</span>
+                <span class="nav-icon">⚔️</span>
+                <span class="nav-label">Duel</span>
             </div>
             <div class="nav-item">
                 <span class="nav-icon">🛍️</span>
@@ -861,23 +607,13 @@
                 <span class="nav-label">Friends</span>
             </div>
             <div class="nav-item">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-label">Home</span>
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Settings</span>
             </div>
         </nav>
 
         <!-- ─── Toast ─── -->
         <div class="toast" id="toast"></div>
-
-        <!-- ─── Ad Overlay ─── -->
-        <div class="ad-overlay" id="adOverlay">
-            <div class="ad-spinner"></div>
-            <div class="ad-status" id="adStatus">
-                Loading ad...
-                <div class="status-detail" id="adStatusDetail">Please wait</div>
-            </div>
-            <div class="ad-close-btn" id="adCloseBtn">✕ Close</div>
-        </div>
 
     </div>
 
@@ -885,31 +621,27 @@
         (function() {
             'use strict';
 
-            // ─── Telegram WebApp ───
+            // ─── Telegram ───
             const tg = window.Telegram?.WebApp;
             if (tg) {
                 tg.ready();
                 tg.expand();
-                console.log('[Telegram] WebApp initialized');
+                console.log('[Telegram] ✅ Ready');
             }
 
-            // ─── DOM refs ───
-            const toastEl = document.getElementById('toast');
-            const adOverlay = document.getElementById('adOverlay');
-            const adStatus = document.getElementById('adStatus');
-            const adStatusDetail = document.getElementById('adStatusDetail');
-            const adCloseBtn = document.getElementById('adCloseBtn');
-
-            let toastTimer = null;
-            let isAdShowing = false;
+            // ─── Close ───
+            document.getElementById('closeBtn').addEventListener('click', () => {
+                if (tg) tg.close();
+                else window.history.back();
+            });
 
             // ─── Toast ───
-            function showToast(message, type = 'success') {
-                if (toastTimer) {
-                    clearTimeout(toastTimer);
-                    toastEl.classList.remove('show', 'success', 'error', 'warning', 'info');
-                }
-                toastEl.textContent = message;
+            const toastEl = document.getElementById('toast');
+            let toastTimer = null;
+
+            function showToast(msg, type = 'success') {
+                if (toastTimer) clearTimeout(toastTimer);
+                toastEl.textContent = msg;
                 toastEl.className = 'toast ' + type;
                 void toastEl.offsetWidth;
                 toastEl.classList.add('show');
@@ -919,467 +651,285 @@
                 }, 3000);
             }
 
-            // ─── Ad Overlay Controls ───
-            function showAdOverlay(message, detail) {
-                adOverlay.classList.add('active');
-                adStatus.textContent = message || 'Loading ad...';
-                adStatusDetail.textContent = detail || 'Please wait';
-                isAdShowing = true;
-                // Prevent scrolling
-                document.body.style.overflow = 'hidden';
+            // ─── DOM ───
+            const totalPointsEl = document.getElementById('totalPoints');
+            const dailyAmount = document.getElementById('dailyAmount');
+            const dailySub = document.getElementById('dailySub');
+            const giftSub = document.getElementById('giftSub');
+            const victorySub = document.getElementById('victorySub');
+            const bonusSub = document.getElementById('bonusSub');
+            const challengeFill = document.getElementById('challengeFill');
+            const challengeProgress = document.getElementById('challengeProgress');
+            const challengeBtn = document.getElementById('challengeBtn');
+
+            let points = 25245;
+            let dailyClaimed = false;
+            let giftClaimed = false;
+            let victoryClaimed = false;
+            let bonusClaimed = false;
+            let challengeProgressVal = 220;
+            const challengeMax = 500;
+            let challengeInProgress = false;
+
+            // ─── Update Points ───
+            function updatePoints(amount) {
+                points += amount;
+                totalPointsEl.innerHTML = `${points.toLocaleString()} <small>pts</small>`;
+                totalPointsEl.classList.add('reward-flash');
+                setTimeout(() => totalPointsEl.classList.remove('reward-flash'), 500);
             }
 
-            function hideAdOverlay() {
-                adOverlay.classList.remove('active');
-                isAdShowing = false;
-                document.body.style.overflow = '';
-            }
+            // ─── Monetix Ad ───
+            function showAd(onComplete, onError) {
+                console.log('[Monetix] 🎬 Showing ad...');
 
-            // ─── Ad Close Button ───
-            if (adCloseBtn) {
-                adCloseBtn.addEventListener('click', function() {
-                    hideAdOverlay();
-                    showToast('Ad closed by user', 'warning');
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                });
-            }
-
-            // ─── Monetix Ad Helper with retry logic ───
-            function showMonetixAd(onComplete, onError, retryCount) {
-                retryCount = retryCount || 0;
-                const maxRetries = 2;
-
-                console.log('[Monetix] Showing ad (attempt ' + (retryCount + 1) + ')');
-                showAdOverlay('Loading ad...', 'Attempt ' + (retryCount + 1));
-
-                // Check if SDK is loaded
                 if (typeof window.showRewardAd !== 'function') {
-                    console.warn('[Monetix] SDK not loaded, waiting...');
-                    showAdOverlay('SDK Loading...', 'Please wait');
-
-                    // Wait for SDK to load
+                    console.warn('[Monetix] ⚠️ SDK not loaded');
+                    showToast('⚠️ Ad SDK loading... Please wait.', 'warning');
+                    // Try again in 1.5s
                     setTimeout(() => {
                         if (typeof window.showRewardAd === 'function') {
-                            console.log('[Monetix] SDK loaded, retrying...');
-                            showMonetixAd(onComplete, onError, retryCount);
+                            showAd(onComplete, onError);
                         } else {
-                            hideAdOverlay();
-                            showToast('⚠️ Ad SDK unavailable. Please try again.', 'error');
+                            showToast('❌ Ad SDK unavailable. Try again.', 'error');
                             if (onError) onError('sdk_unavailable');
                         }
                     }, 1500);
                     return;
                 }
 
-                // Update overlay status
-                showAdOverlay('🎬 Loading ad...', 'Connecting to ad server');
-
                 try {
-                    // Call the Monetix ad SDK with a timeout
-                    let adTimedOut = false;
-                    const timeoutId = setTimeout(() => {
-                        adTimedOut = true;
-                        console.warn('[Monetix] Ad timeout - no response');
-                        hideAdOverlay();
-
-                        if (retryCount < maxRetries) {
-                            showToast('⏳ Ad loading timeout. Retrying...', 'warning');
-                            setTimeout(() => {
-                                showMonetixAd(onComplete, onError, retryCount + 1);
-                            }, 1000);
-                        } else {
-                            showToast('⚠️ Ad unavailable. Please try again later.', 'error');
-                            if (onError) onError('timeout');
-                        }
-                    }, 8000);
-
-                    // Show the ad
                     window.showRewardAd(function(res) {
-                        clearTimeout(timeoutId);
+                        console.log('[Monetix] 📦 Response:', res);
 
-                        if (adTimedOut) {
-                            console.log('[Monetix] Ad response after timeout, ignoring');
-                            return;
-                        }
-
-                        console.log('[Monetix] Ad response:', res);
-                        hideAdOverlay();
-
-                        // Parse response
                         const status = res?.status || res?.state || res?.result || 'unknown';
-                        console.log('[Monetix] Ad status:', status);
+                        console.log('[Monetix] 📊 Status:', status);
 
-                        // Check if ad was successfully watched
-                        const successStatuses = ['completed', 'closed', 'finished', 'done', 'success', 'rewarded',
-                            'viewed', 'shown', 'watched'
+                        const success = ['completed', 'closed', 'finished', 'done', 'success', 'rewarded', 'viewed',
+                            'shown', 'watched'
                         ];
-                        const isSuccess = successStatuses.includes(status.toLowerCase());
+                        const ok = success.includes(status.toLowerCase());
 
-                        if (isSuccess) {
-                            console.log('[Monetix] ✅ Ad completed!');
+                        if (ok) {
+                            console.log('[Monetix] ✅ Success!');
                             showToast('✅ Ad completed! Reward granted!', 'success');
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                             if (onComplete) onComplete();
                         } else {
-                            // Check if it's a "no ad available" error
-                            const isNoAd = status === 'skipped' || status === 'error' || status === 'failed' ||
-                                status === 'unavailable' || status === 'not_found';
-
-                            if (isNoAd && retryCount < maxRetries) {
-                                console.log('[Monetix] No ad available, retrying...');
-                                showToast('🔄 No ad available. Retrying...', 'warning');
-                                setTimeout(() => {
-                                    showMonetixAd(onComplete, onError, retryCount + 1);
-                                }, 1500);
-                            } else {
-                                console.log('[Monetix] ❌ Ad failed:', status);
-                                showToast(`Ad ${status}. Please try again.`, 'error');
-                                if (onError) onError(status);
-                            }
+                            console.log('[Monetix] ❌ Failed:', status);
+                            showToast(`Ad ${status}. Try again.`, 'error');
+                            if (onError) onError(status);
                         }
                     });
                 } catch (err) {
-                    console.error('[Monetix] Ad error:', err);
-                    clearTimeout(timeoutId);
-                    hideAdOverlay();
-
-                    if (retryCount < maxRetries) {
-                        showToast('🔄 Error loading ad. Retrying...', 'warning');
-                        setTimeout(() => {
-                            showMonetixAd(onComplete, onError, retryCount + 1);
-                        }, 1500);
-                    } else {
-                        showToast('⚠️ Ad failed to load. Try again!', 'error');
-                        if (onError) onError('error');
-                    }
+                    console.error('[Monetix] 💥 Error:', err);
+                    showToast('⚠️ Ad error. Try again.', 'error');
+                    if (onError) onError('error');
                 }
             }
 
-            // ─── Close button ───
-            const closeBtn = document.getElementById('closeBtn');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => {
-                    if (isAdShowing) {
-                        hideAdOverlay();
-                        showToast('Ad closed', 'warning');
-                        return;
-                    }
-                    if (tg) tg.close();
-                    else window.history.back();
-                });
+            // ─── Reward Helpers ───
+            function getRandom(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
             }
-
-            // ─── Trophy button ───
-            const trophyBtn = document.getElementById('trophyBtn');
-            const dailyReward = document.getElementById('dailyReward');
-            if (trophyBtn) {
-                trophyBtn.addEventListener('click', () => {
-                    showToast('🏆 You earned 50 bonus points!', 'success');
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-                    const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
-                    dailyReward.innerHTML = `+${(current + 50).toLocaleString()} <small>pts</small>`;
-                    dailyReward.classList.add('reward-flash');
-                    setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                });
-            }
-
-            // ─── Gift timer countdown ───
-            const timerEl = document.getElementById('giftTimer');
-            const giftBadge = document.getElementById('giftBadge');
-            if (timerEl) {
-                let totalSeconds = 15 * 3600 + 26 * 60 + 8;
-
-                function updateTimer() {
-                    if (totalSeconds <= 0) {
-                        timerEl.textContent = '00:00:00';
-                        if (giftBadge) giftBadge.textContent = 'Ready!';
-                        return;
-                    }
-                    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-                    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-                    const s = String(totalSeconds % 60).padStart(2, '0');
-                    timerEl.textContent = `${h}:${m}:${s}`;
-                    totalSeconds--;
-                }
-                updateTimer();
-                setInterval(updateTimer, 1000);
-            }
-
-            // ─── DOM refs for rewards ───
-            const dailyTask = document.getElementById('dailyTask');
-            const dailySub = document.getElementById('dailySub');
-            const giftBox = document.getElementById('giftBox');
-            const victoryBox = document.getElementById('victoryBox');
-            const challengeBtn = document.getElementById('challengeBtn');
-            const fillBar = document.getElementById('fillBar');
-            const progressText = document.getElementById('progressText');
-
-            let dailyClaimed = false;
-            let giftOpened = false;
-            let victoryClaimed = false;
-            let currentProgress = 220;
-            const maxProgress = 500;
-            let challengeInProgress = false;
 
             // ─── Daily Task ───
-            if (dailyTask) {
-                dailyTask.addEventListener('click', function() {
-                    if (dailyClaimed) {
-                        showToast('✅ Daily task already claimed!', 'warning');
-                        return;
-                    }
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
-                    }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.querySelector('[data-reward="daily"]').addEventListener('click', function() {
+                if (dailyClaimed) {
+                    showToast('✅ Already claimed today!', 'warning');
+                    return;
+                }
+                if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 
-                    showMonetixAd(
-                        function() {
-                            dailyClaimed = true;
-                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
-                            const bonus = Math.floor(Math.random() * 500) + 100;
-                            const newVal = current + bonus;
-                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
-                            dailySub.textContent = '✅ Claimed!';
-                            dailyReward.classList.add('reward-flash');
-                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                            showToast(`🎉 +${bonus} bonus points!`, 'success');
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        },
-                        function(status) {
-                            console.log('[Monetix] Daily task ad failed:', status);
-                            // Don't show extra error - the helper already shows it
-                        }
-                    );
-                });
-            }
+                showAd(
+                    function() {
+                        const bonus = getRandom(100, 500);
+                        dailyClaimed = true;
+                        dailyAmount.textContent = `+${bonus}`;
+                        dailySub.textContent = '✅ Claimed!';
+                        this.querySelector('.badge').textContent = 'CLAIMED';
+                        this.querySelector('.badge').className = 'badge claimed';
+                        updatePoints(bonus);
+                        showToast(`🎉 +${bonus} points!`, 'success');
+                    }.bind(this),
+                    function(status) {
+                        console.log('[Monetix] Daily ad failed:', status);
+                    }
+                );
+            });
 
             // ─── Gift Box ───
-            if (giftBox) {
-                giftBox.addEventListener('click', function() {
-                    if (giftOpened) {
-                        showToast('🎁 Gift already claimed!', 'warning');
-                        return;
-                    }
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
-                    }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.querySelector('[data-reward="gift"]').addEventListener('click', function() {
+                if (giftClaimed) {
+                    showToast('🎁 Already opened!', 'warning');
+                    return;
+                }
+                if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 
-                    showMonetixAd(
-                        function() {
-                            giftOpened = true;
-                            const bonus = Math.floor(Math.random() * 800) + 200;
-                            if (giftBadge) giftBadge.textContent = '🎉 Opened!';
-                            showToast(`🎁 Gift opened! +${bonus} points!`, 'success');
-                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
-                            const newVal = current + bonus;
-                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
-                            dailyReward.classList.add('reward-flash');
-                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        },
-                        function(status) {
-                            console.log('[Monetix] Gift box ad failed:', status);
-                        }
-                    );
-                });
-            }
-
-            // ─── Victory Box ───
-            if (victoryBox) {
-                victoryBox.addEventListener('click', function() {
-                    if (victoryClaimed) {
-                        showToast('🏅 Victory bonus already claimed!', 'warning');
-                        return;
+                showAd(
+                    function() {
+                        const bonus = getRandom(200, 800);
+                        giftClaimed = true;
+                        giftSub.textContent = '✅ Opened!';
+                        this.querySelector('.badge').textContent = 'OPENED';
+                        this.querySelector('.badge').className = 'badge claimed';
+                        updatePoints(bonus);
+                        showToast(`🎁 +${bonus} points!`, 'success');
+                    }.bind(this),
+                    function(status) {
+                        console.log('[Monetix] Gift ad failed:', status);
                     }
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
-                    }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-                    showMonetixAd(
-                        function() {
-                            victoryClaimed = true;
-                            const bonus = 3;
-                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
-                            const newVal = current + bonus;
-                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
-                            dailyReward.classList.add('reward-flash');
-                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                            showToast(`🏅 +${bonus} victory bonus!`, 'success');
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        },
-                        function(status) {
-                            console.log('[Monetix] Victory ad failed:', status);
-                        }
-                    );
-                });
-            }
-
-            // ─── +3 Buttons ───
-            document.querySelectorAll('.plus-btn').forEach((btn) => {
-                btn.addEventListener('click', function() {
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
-                    }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-                    showMonetixAd(
-                        function() {
-                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) ||
-                            25245;
-                            const newVal = current + 3;
-                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
-                            dailyReward.classList.add('reward-flash');
-                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                            btn.style.transform = 'scale(0.92)';
-                            btn.style.background = 'rgba(74, 222, 128, 0.15)';
-                            setTimeout(() => {
-                                btn.style.transform = '';
-                                btn.style.background = '';
-                            }, 300);
-                            showToast('✅ +3 points claimed!', 'success');
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        },
-                        function(status) {
-                            console.log('[Monetix] +3 button ad failed:', status);
-                        }
-                    );
-                });
+                );
             });
 
-            // ─── Challenge Button ───
-            if (challengeBtn && fillBar && progressText) {
-                challengeBtn.addEventListener('click', function(e) {
-                    if (challengeInProgress) return;
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
+            // ─── Victory ───
+            document.querySelector('[data-reward="victory"]').addEventListener('click', function() {
+                if (victoryClaimed) {
+                    showToast('🏅 Already claimed!', 'warning');
+                    return;
+                }
+                if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+                showAd(
+                    function() {
+                        victoryClaimed = true;
+                        victorySub.textContent = '✅ Claimed!';
+                        this.querySelector('.badge').textContent = 'CLAIMED';
+                        this.querySelector('.badge').className = 'badge claimed';
+                        updatePoints(3);
+                        showToast('🏅 +3 victory points!', 'success');
+                    }.bind(this),
+                    function(status) {
+                        console.log('[Monetix] Victory ad failed:', status);
                     }
-                    if (currentProgress >= maxProgress) {
-                        showToast('🎉 Challenge already complete!', 'warning');
-                        return;
+                );
+            });
+
+            // ─── Bonus ───
+            document.querySelector('[data-reward="bonus"]').addEventListener('click', function() {
+                if (bonusClaimed) {
+                    showToast('⚡ Already claimed!', 'warning');
+                    return;
+                }
+                if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+                showAd(
+                    function() {
+                        bonusClaimed = true;
+                        bonusSub.textContent = '✅ Claimed!';
+                        this.querySelector('.badge').textContent = 'CLAIMED';
+                        this.querySelector('.badge').className = 'badge claimed';
+                        updatePoints(5);
+                        showToast('⚡ +5 bonus points!', 'success');
+                    }.bind(this),
+                    function(status) {
+                        console.log('[Monetix] Bonus ad failed:', status);
                     }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                );
+            });
 
-                    challengeInProgress = true;
-                    challengeBtn.textContent = '⏳ Loading...';
-                    challengeBtn.classList.add('ad-loading');
+            // ─── Challenge ───
+            challengeBtn.addEventListener('click', function() {
+                if (challengeInProgress) return;
+                if (challengeProgressVal >= challengeMax) {
+                    showToast('🎉 Challenge complete!', 'warning');
+                    return;
+                }
+                if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
-                    showMonetixAd(
-                        function() {
-                            const increment = Math.floor(Math.random() * 16) + 10;
-                            currentProgress = Math.min(currentProgress + increment, maxProgress);
-                            const percent = (currentProgress / maxProgress) * 100;
-                            fillBar.style.width = percent + '%';
-                            progressText.innerHTML =
-                            `<strong>${currentProgress}</strong> / ${maxProgress}`;
+                challengeInProgress = true;
+                this.textContent = '⏳ Loading...';
+                this.disabled = true;
 
-                            challengeBtn.textContent = '✅ +' + increment;
-                            challengeBtn.style.background = '#4ade80';
-                            challengeBtn.style.boxShadow = '0 4px 16px rgba(74, 222, 128, 0.3)';
+                showAd(
+                    function() {
+                        const inc = getRandom(10, 25);
+                        challengeProgressVal = Math.min(challengeProgressVal + inc, challengeMax);
+                        const pct = (challengeProgressVal / challengeMax) * 100;
+                        challengeFill.style.width = pct + '%';
+                        challengeProgress.innerHTML = `<strong>${challengeProgressVal}</strong> / ${challengeMax}`;
 
-                            showToast(`⚡ +${increment} challenge progress!`, 'success');
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred(
-                            'success');
+                        this.textContent = '✅ +' + inc;
+                        this.style.background = '#4ade80';
+                        this.style.boxShadow = '0 4px 16px rgba(74, 222, 128, 0.3)';
 
-                            setTimeout(() => {
-                                challengeBtn.textContent = 'Challenge';
-                                challengeBtn.style.background = '';
-                                challengeBtn.style.boxShadow = '';
-                                challengeInProgress = false;
-                                challengeBtn.classList.remove('ad-loading');
-                            }, 1500);
+                        showToast(`⚡ +${inc} progress!`, 'success');
+                        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
-                            if (currentProgress >= maxProgress) {
-                                setTimeout(() => {
-                                    challengeBtn.textContent = '✅ Done!';
-                                    challengeBtn.style.background = '#4ade80';
-                                    challengeBtn.style.boxShadow =
-                                        '0 4px 16px rgba(74, 222, 128, 0.4)';
-                                    showToast('🎉 Challenge complete! +150 pts bonus!',
-                                    'success');
-                                    const cur = parseInt(dailyReward.textContent.replace(
-                                        /[^0-9]/g, '')) || 25245;
-                                    dailyReward.innerHTML =
-                                        `+${(cur + 150).toLocaleString()} <small>pts</small>`;
-                                    dailyReward.classList.add('reward-flash');
-                                    setTimeout(() => dailyReward.classList.remove(
-                                    'reward-flash'), 600);
-                                    setTimeout(() => {
-                                        challengeBtn.textContent = 'Challenge';
-                                        challengeBtn.style.background = '';
-                                        challengeBtn.style.boxShadow = '';
-                                        challengeInProgress = false;
-                                        challengeBtn.classList.remove('ad-loading');
-                                        currentProgress = 0;
-                                        fillBar.style.width = '0%';
-                                        progressText.innerHTML =
-                                            `<strong>0</strong> / ${maxProgress}`;
-                                    }, 3000);
-                                }, 500);
-                            }
-                        },
-                        function(status) {
-                            challengeBtn.textContent = 'Challenge';
-                            challengeBtn.classList.remove('ad-loading');
+                        setTimeout(() => {
+                            this.textContent = '🚀 Boost';
+                            this.style.background = '';
+                            this.style.boxShadow = '';
+                            this.disabled = false;
                             challengeInProgress = false;
-                            console.log('[Monetix] Challenge ad failed:', status);
-                        }
-                    );
-                });
-            }
+                        }, 1200);
 
-            // ─── Nav items ───
+                        // Challenge complete
+                        if (challengeProgressVal >= challengeMax) {
+                            setTimeout(() => {
+                                this.textContent = '✅ Done!';
+                                this.style.background = '#4ade80';
+                                this.style.boxShadow = '0 4px 16px rgba(74, 222, 128, 0.4)';
+                                showToast('🎉 Challenge complete! +150 pts!', 'success');
+                                updatePoints(150);
+                                setTimeout(() => {
+                                    this.textContent = '🚀 Boost';
+                                    this.style.background = '';
+                                    this.style.boxShadow = '';
+                                    this.disabled = false;
+                                    challengeInProgress = false;
+                                    challengeProgressVal = 0;
+                                    challengeFill.style.width = '0%';
+                                    challengeProgress.innerHTML =
+                                        `<strong>0</strong> / ${challengeMax}`;
+                                }, 3000);
+                            }, 500);
+                        }
+                    }.bind(this),
+                    function(status) {
+                        this.textContent = '🚀 Boost';
+                        this.disabled = false;
+                        challengeInProgress = false;
+                        console.log('[Monetix] Challenge ad failed:', status);
+                    }.bind(this)
+                );
+            });
+
+            // ─── Nav ───
             document.querySelectorAll('.nav-item').forEach((item) => {
                 item.addEventListener('click', function() {
-                    document.querySelectorAll('.nav-item').forEach((el) => el.classList.remove('active'));
+                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                     this.classList.add('active');
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                    if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
                     const label = this.querySelector('.nav-label')?.textContent || '';
-                    showToast(`📍 ${label} tab`, 'info');
+                    showToast(`📍 ${label}`, 'info');
                 });
             });
 
-            // ─── Avatar click ───
-            const avatar = document.querySelector('.avatar');
-            if (avatar) {
-                avatar.addEventListener('click', () => {
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('rigid');
-                    avatar.style.transform = 'scale(0.9)';
-                    setTimeout(() => avatar.style.transform = '', 180);
-                    showToast('👤 Profile — Level 17', 'info');
-                });
-            }
-
-            // ─── Theme sync ───
-            if (tg && tg.onEvent) {
+            // ─── Theme Sync ───
+            if (tg?.onEvent) {
                 tg.onEvent('themeChanged', () => {
                     document.body.style.background = 'var(--tg-bg)';
                 });
             }
 
-            // ─── Check Monetix SDK ───
+            // ─── SDK Check ───
             setTimeout(() => {
-                console.log('[Monetix] SDK check:', typeof window.showRewardAd === 'function' ? '✅ Loaded' :
-                    '❌ Not loaded');
-                if (typeof window.showRewardAd === 'function') {
-                    showToast('✅ Ad SDK ready!', 'success');
-                } else {
-                    console.warn('[Monetix] SDK not loaded. Check console for errors.');
+                const loaded = typeof window.showRewardAd === 'function';
+                console.log('[Monetix] SDK:', loaded ? '✅ Loaded' : '❌ Not loaded');
+                if (!loaded) {
                     showToast('⚠️ Ad SDK loading...', 'warning');
+                } else {
+                    showToast('✅ Ad SDK ready!', 'success');
                 }
-            }, 3000);
+            }, 2500);
 
-            console.log('[Katrin TMA] Ready ✅ with Monetix ads');
+            console.log('[Reward Hub] 🚀 Ready');
 
         })();
     </script>
 
 </body>
-</html>
+</html>                                       
+
+            
