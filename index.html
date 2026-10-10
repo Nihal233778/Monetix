@@ -1,15 +1,16 @@
-         <!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Katrin — TMA</title>
+    
     <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js?56">
-    </script>
-    <!-- Monetix Ads SDK -->
-    <script src="https://www.monetixads.online/ads.js" data-mxid="MX-5345E1E9">
-    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    
+    <!-- ✅ Monetix Ads SDK (Integrated in Head) -->
+    <script src="https://www.monetixads.online/ads.js" data-mxid="MX-81116B3D" data-format="pounder"></script>
+
     <style>
         /* ── Reset & Base ── */
         * {
@@ -54,8 +55,7 @@
             }
         }
 
-        html,
-        body {
+        html, body {
             height: 100%;
             font-family: var(--font);
             background: var(--tg-bg);
@@ -577,8 +577,7 @@
         }
 
         @keyframes pulse-glow {
-            0%,
-            100% {
+            0%, 100% {
                 box-shadow: 0 0 0 0 rgba(247, 201, 72, 0.2);
             }
             50% {
@@ -591,16 +590,9 @@
         }
 
         @keyframes reward-flash {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.12);
-                color: #4ade80;
-            }
-            100% {
-                transform: scale(1);
-            }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.12); color: #4ade80; }
+            100% { transform: scale(1); }
         }
 
         .reward-flash {
@@ -658,25 +650,10 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        .toast.success {
-            background: #4ade80;
-            color: #0a0a0f;
-        }
-
-        .toast.error {
-            background: #ef4444;
-            color: #fff;
-        }
-
-        .toast.warning {
-            background: #f59e0b;
-            color: #0a0a0f;
-        }
-
-        .toast.info {
-            background: var(--blue);
-            color: #fff;
-        }
+        .toast.success { background: #4ade80; color: #0a0a0f; }
+        .toast.error { background: #ef4444; color: #fff; }
+        .toast.warning { background: #f59e0b; color: #0a0a0f; }
+        .toast.info { background: var(--blue); color: #fff; }
 
         /* Ad Overlay Container */
         .ad-overlay {
@@ -739,9 +716,7 @@
         }
 
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -925,7 +900,6 @@
                 adStatus.textContent = message || 'Loading ad...';
                 adStatusDetail.textContent = detail || 'Please wait';
                 isAdShowing = true;
-                // Prevent scrolling
                 document.body.style.overflow = 'hidden';
             }
 
@@ -944,7 +918,7 @@
                 });
             }
 
-            // ─── Monetix Ad Helper with retry logic ───
+            // ─── ✅ Monetix Ad Helper (Integrated with new SDK) ───
             function showMonetixAd(onComplete, onError, retryCount) {
                 retryCount = retryCount || 0;
                 const maxRetries = 2;
@@ -957,7 +931,6 @@
                     console.warn('[Monetix] SDK not loaded, waiting...');
                     showAdOverlay('SDK Loading...', 'Please wait');
 
-                    // Wait for SDK to load
                     setTimeout(() => {
                         if (typeof window.showRewardAd === 'function') {
                             console.log('[Monetix] SDK loaded, retrying...');
@@ -971,11 +944,9 @@
                     return;
                 }
 
-                // Update overlay status
                 showAdOverlay('🎬 Loading ad...', 'Connecting to ad server');
 
                 try {
-                    // Call the Monetix ad SDK with a timeout
                     let adTimedOut = false;
                     const timeoutId = setTimeout(() => {
                         adTimedOut = true;
@@ -993,7 +964,7 @@
                         }
                     }, 8000);
 
-                    // Show the ad
+                    // Show the ad using the specific SDK function
                     window.showRewardAd(function(res) {
                         clearTimeout(timeoutId);
 
@@ -1005,7 +976,7 @@
                         console.log('[Monetix] Ad response:', res);
                         hideAdOverlay();
 
-                        // Parse response
+                        // Parse response - the SDK might return different formats
                         const status = res?.status || res?.state || res?.result || 'unknown';
                         console.log('[Monetix] Ad status:', status);
 
@@ -1021,7 +992,6 @@
                             if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                             if (onComplete) onComplete();
                         } else {
-                            // Check if it's a "no ad available" error
                             const isNoAd = status === 'skipped' || status === 'error' || status === 'failed' ||
                                 status === 'unavailable' || status === 'not_found';
 
@@ -1079,308 +1049,4 @@
                     const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
                     dailyReward.innerHTML = `+${(current + 50).toLocaleString()} <small>pts</small>`;
                     dailyReward.classList.add('reward-flash');
-                    setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                });
-            }
-
-            // ─── Gift timer countdown ───
-            const timerEl = document.getElementById('giftTimer');
-            const giftBadge = document.getElementById('giftBadge');
-            if (timerEl) {
-                let totalSeconds = 15 * 3600 + 26 * 60 + 8;
-
-                function updateTimer() {
-                    if (totalSeconds <= 0) {
-                        timerEl.textContent = '00:00:00';
-                        if (giftBadge) giftBadge.textContent = 'Ready!';
-                        return;
-                    }
-                    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-                    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-                    const s = String(totalSeconds % 60).padStart(2, '0');
-                    timerEl.textContent = `${h}:${m}:${s}`;
-                    totalSeconds--;
-                }
-                updateTimer();
-                setInterval(updateTimer, 1000);
-            }
-
-            // ─── DOM refs for rewards ───
-            const dailyTask = document.getElementById('dailyTask');
-            const dailySub = document.getElementById('dailySub');
-            const giftBox = document.getElementById('giftBox');
-            const victoryBox = document.getElementById('victoryBox');
-            const challengeBtn = document.getElementById('challengeBtn');
-            const fillBar = document.getElementById('fillBar');
-            const progressText = document.getElementById('progressText');
-
-            let dailyClaimed = false;
-            let giftOpened = false;
-            let victoryClaimed = false;
-            let currentProgress = 220;
-            const maxProgress = 500;
-            let challengeInProgress = false;
-
-            // ─── Daily Task ───
-            if (dailyTask) {
-                dailyTask.addEventListener('click', function() {
-                    if (dailyClaimed) {
-                        showToast('✅ Daily task already claimed!', 'warning');
-                        return;
-                    }
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
-                    }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-                    showMonetixAd(
-                        function() {
-                            dailyClaimed = true;
-                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
-                            const bonus = Math.floor(Math.random() * 500) + 100;
-                            const newVal = current + bonus;
-                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
-                            dailySub.textContent = '✅ Claimed!';
-                            dailyReward.classList.add('reward-flash');
-                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                            showToast(`🎉 +${bonus} bonus points!`, 'success');
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        },
-                        function(status) {
-                            console.log('[Monetix] Daily task ad failed:', status);
-                            // Don't show extra error - the helper already shows it
-                        }
-                    );
-                });
-            }
-
-            // ─── Gift Box ───
-            if (giftBox) {
-                giftBox.addEventListener('click', function() {
-                    if (giftOpened) {
-                        showToast('🎁 Gift already claimed!', 'warning');
-                        return;
-                    }
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
-                    }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-                    showMonetixAd(
-                        function() {
-                            giftOpened = true;
-                            const bonus = Math.floor(Math.random() * 800) + 200;
-                            if (giftBadge) giftBadge.textContent = '🎉 Opened!';
-                            showToast(`🎁 Gift opened! +${bonus} points!`, 'success');
-                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
-                            const newVal = current + bonus;
-                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
-                            dailyReward.classList.add('reward-flash');
-                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        },
-                        function(status) {
-                            console.log('[Monetix] Gift box ad failed:', status);
-                        }
-                    );
-                });
-            }
-
-            // ─── Victory Box ───
-            if (victoryBox) {
-                victoryBox.addEventListener('click', function() {
-                    if (victoryClaimed) {
-                        showToast('🏅 Victory bonus already claimed!', 'warning');
-                        return;
-                    }
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
-                    }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-                    showMonetixAd(
-                        function() {
-                            victoryClaimed = true;
-                            const bonus = 3;
-                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) || 25245;
-                            const newVal = current + bonus;
-                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
-                            dailyReward.classList.add('reward-flash');
-                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                            showToast(`🏅 +${bonus} victory bonus!`, 'success');
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        },
-                        function(status) {
-                            console.log('[Monetix] Victory ad failed:', status);
-                        }
-                    );
-                });
-            }
-
-            // ─── +3 Buttons ───
-            document.querySelectorAll('.plus-btn').forEach((btn) => {
-                btn.addEventListener('click', function() {
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
-                    }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-                    showMonetixAd(
-                        function() {
-                            const current = parseInt(dailyReward.textContent.replace(/[^0-9]/g, '')) ||
-                            25245;
-                            const newVal = current + 3;
-                            dailyReward.innerHTML = `+${newVal.toLocaleString()} <small>pts</small>`;
-                            dailyReward.classList.add('reward-flash');
-                            setTimeout(() => dailyReward.classList.remove('reward-flash'), 600);
-                            btn.style.transform = 'scale(0.92)';
-                            btn.style.background = 'rgba(74, 222, 128, 0.15)';
-                            setTimeout(() => {
-                                btn.style.transform = '';
-                                btn.style.background = '';
-                            }, 300);
-                            showToast('✅ +3 points claimed!', 'success');
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        },
-                        function(status) {
-                            console.log('[Monetix] +3 button ad failed:', status);
-                        }
-                    );
-                });
-            });
-
-            // ─── Challenge Button ───
-            if (challengeBtn && fillBar && progressText) {
-                challengeBtn.addEventListener('click', function(e) {
-                    if (challengeInProgress) return;
-                    if (isAdShowing) {
-                        showToast('⏳ Ad is already loading...', 'warning');
-                        return;
-                    }
-                    if (currentProgress >= maxProgress) {
-                        showToast('🎉 Challenge already complete!', 'warning');
-                        return;
-                    }
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-                    challengeInProgress = true;
-                    challengeBtn.textContent = '⏳ Loading...';
-                    challengeBtn.classList.add('ad-loading');
-
-                    showMonetixAd(
-                        function() {
-                            const increment = Math.floor(Math.random() * 16) + 10;
-                            currentProgress = Math.min(currentProgress + increment, maxProgress);
-                            const percent = (currentProgress / maxProgress) * 100;
-                            fillBar.style.width = percent + '%';
-                            progressText.innerHTML =
-                            `<strong>${currentProgress}</strong> / ${maxProgress}`;
-
-                            challengeBtn.textContent = '✅ +' + increment;
-                            challengeBtn.style.background = '#4ade80';
-                            challengeBtn.style.boxShadow = '0 4px 16px rgba(74, 222, 128, 0.3)';
-
-                            showToast(`⚡ +${increment} challenge progress!`, 'success');
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred(
-                            'success');
-
-                            setTimeout(() => {
-                                challengeBtn.textContent = 'Challenge';
-                                challengeBtn.style.background = '';
-                                challengeBtn.style.boxShadow = '';
-                                challengeInProgress = false;
-                                challengeBtn.classList.remove('ad-loading');
-                            }, 1500);
-
-                            if (currentProgress >= maxProgress) {
-                                setTimeout(() => {
-                                    challengeBtn.textContent = '✅ Done!';
-                                    challengeBtn.style.background = '#4ade80';
-                                    challengeBtn.style.boxShadow =
-                                        '0 4px 16px rgba(74, 222, 128, 0.4)';
-                                    showToast('🎉 Challenge complete! +150 pts bonus!',
-                                    'success');
-                                    const cur = parseInt(dailyReward.textContent.replace(
-                                        /[^0-9]/g, '')) || 25245;
-                                    dailyReward.innerHTML =
-                                        `+${(cur + 150).toLocaleString()} <small>pts</small>`;
-                                    dailyReward.classList.add('reward-flash');
-                                    setTimeout(() => dailyReward.classList.remove(
-                                    'reward-flash'), 600);
-                                    setTimeout(() => {
-                                        challengeBtn.textContent = 'Challenge';
-                                        challengeBtn.style.background = '';
-                                        challengeBtn.style.boxShadow = '';
-                                        challengeInProgress = false;
-                                        challengeBtn.classList.remove('ad-loading');
-                                        currentProgress = 0;
-                                        fillBar.style.width = '0%';
-                                        progressText.innerHTML =
-                                            `<strong>0</strong> / ${maxProgress}`;
-                                    }, 3000);
-                                }, 500);
-                            }
-                        },
-                        function(status) {
-                            challengeBtn.textContent = 'Challenge';
-                            challengeBtn.classList.remove('ad-loading');
-                            challengeInProgress = false;
-                            console.log('[Monetix] Challenge ad failed:', status);
-                        }
-                    );
-                });
-            }
-
-            // ─── Nav items ───
-            document.querySelectorAll('.nav-item').forEach((item) => {
-                item.addEventListener('click', function() {
-                    document.querySelectorAll('.nav-item').forEach((el) => el.classList.remove('active'));
-                    this.classList.add('active');
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-                    const label = this.querySelector('.nav-label')?.textContent || '';
-                    showToast(`📍 ${label} tab`, 'info');
-                });
-            });
-
-            // ─── Avatar click ───
-            const avatar = document.querySelector('.avatar');
-            if (avatar) {
-                avatar.addEventListener('click', () => {
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('rigid');
-                    avatar.style.transform = 'scale(0.9)';
-                    setTimeout(() => avatar.style.transform = '', 180);
-                    showToast('👤 Profile — Level 17', 'info');
-                });
-            }
-
-            // ─── Theme sync ───
-            if (tg && tg.onEvent) {
-                tg.onEvent('themeChanged', () => {
-                    document.body.style.background = 'var(--tg-bg)';
-                });
-            }
-
-            // ─── Check Monetix SDK ───
-            setTimeout(() => {
-                console.log('[Monetix] SDK check:', typeof window.showRewardAd === 'function' ? '✅ Loaded' :
-                    '❌ Not loaded');
-                if (typeof window.showRewardAd === 'function') {
-                    showToast('✅ Ad SDK ready!', 'success');
-                } else {
-                    console.warn('[Monetix] SDK not loaded. Check console for errors.');
-                    showToast('⚠️ Ad SDK loading...', 'warning');
-                }
-            }, 3000);
-
-            console.log('[Katrin TMA] Ready ✅ with Monetix ads');
-
-        })();
-    </script>
-
-</body>
-</html>                 
-            
+                    setTimeout(() => dailyReward.classList.remove('reward-flash'),                              .                                        
